@@ -12,7 +12,7 @@
 
 	import { deleteModel, getOllamaVersion, pullModel } from '$lib/apis/ollama';
 
-	import { user, MODEL_DOWNLOAD_POOL, models, mobile, temporaryChatEnabled } from '$lib/stores';
+	import { user, MODEL_DOWNLOAD_POOL, models, mobile, temporaryChatEnabled, docSearchEnabled } from '$lib/stores';
 	import { toast } from 'svelte-sonner';
 	import { capitalizeFirstLetter, sanitizeResponseContent, splitStream } from '$lib/utils';
 	import { getModels } from '$lib/apis';
@@ -31,6 +31,7 @@
 	export let searchPlaceholder = $i18n.t('Search a model');
 
 	export let showTemporaryChatControl = false;
+	export let showDocSearchControl = false;
 
 	export let items: {
 		label: string;
@@ -231,7 +232,7 @@
 >
 	<DropdownMenu.Trigger class="relative w-full font-primary" aria-label={placeholder}>
 		<div
-			class="flex w-full text-left px-0.5 outline-none bg-transparent truncate text-lg font-medium placeholder-gray-400 focus:outline-none"
+			class="flex w-full text-left px-0.5 outline-none bg-transparent truncate text-lg font-semibold placeholder-gray-400 focus:outline-none"
 		>
 			{#if selectedModel}
 				{selectedModel.label}
@@ -302,7 +303,7 @@
 					>
 						<div class="flex flex-col">
 							{#if $mobile && (item?.model?.info?.meta?.tags ?? []).length > 0}
-								<div class="flex gap-0.5 self-start h-full mb-1.5 -translate-x-1">
+								<div class="flex gap-0.5 self-start h-full mb-0.5 -translate-x-1">
 									{#each item.model?.info?.meta.tags as tag}
 										<div
 											class=" text-xs font-bold px-1 rounded uppercase line-clamp-1 bg-gray-500/20 text-gray-700 dark:text-gray-200"
@@ -418,7 +419,7 @@
 						</div>
 
 						{#if value === item.value}
-							<div class="ml-auto pl-2 pr-2 md:pr-0">
+							<div class="ml-auto pl-2">
 								<Check />
 							</div>
 						{/if}
@@ -552,6 +553,36 @@
 
 						<div>
 							<Switch state={$temporaryChatEnabled} />
+						</div>
+					</button>
+				</div>
+			{/if}
+
+			{#if showDocSearchControl}
+				<hr class="border-gray-100 dark:border-gray-800" />
+
+				<div class="flex items-center mx-2 my-2">
+					<button
+						class="flex justify-between w-full font-medium line-clamp-1 select-none items-center rounded-button py-2 px-3 text-sm text-gray-700 dark:text-gray-100 outline-none transition-all duration-75 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer data-[highlighted]:bg-muted"
+						on:click={async () => {
+							docSearchEnabled.set(!$docSearchEnabled);
+							await goto('/');
+							const docSearchButton = document.getElementById('doc-search-button');
+							setTimeout(() => {
+								docSearchButton?.click();
+							}, 0);
+
+							show = false;
+						}}
+					>
+						<div class="flex gap-2.5 items-center">
+							<Search className="size-4" strokeWidth="2.5" />
+
+							{$i18n.t(`Document Search`)}
+						</div>
+
+						<div>
+							<Switch state={$docSearchEnabled} />
 						</div>
 					</button>
 				</div>
